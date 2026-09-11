@@ -1,0 +1,197 @@
+services:
+
+  db:
+    image: mysql:8.4
+    container_name: healthcare-mysql
+    restart: unless-stopped
+
+    environment:
+      MYSQL_DATABASE: healthcare_copilot
+      MYSQL_ROOT_PASSWORD: Root
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-pRoot"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: healthcare-redis-docker
+    restart: unless-stopped
+
+    ports:
+      - "6380:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "ping"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: healthcare-web
+    restart: unless-stopped
+
+    command: >
+      sh -c "
+      python manage.py migrate &&
+      python manage.py collectstatic --noinput &&
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 1
+      --timeout 120
+      "
+
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+
+      DEBUG: "False"
+
+      SECRET_KEY: docker-development-secret-change-this
+
+      DB_NAME: healthcare_copilot
+      DB_USER: root
+      DB_PASSWORD: Root
+      DB_HOST: db
+      DB_PORT: "3306"
+
+      REDIS_HOST: redis
+
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: llama2:7b
+
+      ALLOWED_HOSTS: localhost,127.0.0.1,web,nginx
+
+      CSRF_TRUSTED_ORIGINS: http://localhost,http://127.0.0.1
+
+      SECURE_SSL_REDIRECT: "False"
+      SECURE_HSTS_SECONDS: "0"
+
+      CUDA_VISIBLE_DEVICES: ""
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    volumes:
+      - media_data:/app/media
+      - static_data:/app/staticfiles
+      - vector_data:/app/vector_store
+
+    expose:
+      - "8000"
+
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: healthcare-celery
+    restart: unless-stopped
+
+    command: >
+      celery -A config.celery worker
+      --loglevel=info
+      --pool=solo
+
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+
+      DEBUG: "False"
+
+      SECRET_KEY: docker-development-secret-change-this
+
+      DB_NAME: healthcare_copilot
+      DB_USER: root
+      DB_PASSWORD: Root
+      DB_HOST: db
+      DB_PORT: "3306"
+
+      REDIS_HOST: redis
+
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: llama2:7b
+
+      ALLOWED_HOSTS: localhost,127.0.0.1,web,nginx
+
+      CSRF_TRUSTED_ORIGINS: http://localhost,http://127.0.0.1
+
+      SECURE_SSL_REDIRECT: "False"
+      SECURE_HSTS_SECONDS: "0"
+
+      CUDA_VISIBLE_DEVICES: ""
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    volumes:
+      - media_data:/app/media
+      - vector_data:/app/vector_store
+
+
+  nginx:
+    image: nginx:alpine
+    container_name: healthcare-nginx
+    restart: unless-stopped
+
+    ports:
+      - "8080:80"
+
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_data:/app/staticfiles:ro
+      - media_data:/app/media:ro
+
+    depends_on:
+      - web
+
+
+volumes:
+  mysql_data:
+  redis_data:
+  media_data:
+  static_data:
+  vector_data:
