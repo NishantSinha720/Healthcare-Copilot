@@ -74,6 +74,40 @@ class AskQuestionView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Sensitive appointment cancellation must require
+        # explicit confirmation and must not depend on Ollama.
+        question_lower = question.lower()
+
+        if (
+            "appointment" in question_lower
+            and (
+                "cancel" in question_lower
+                or "cancellation" in question_lower
+                or "cancelling" in question_lower
+                or "canceling" in question_lower
+            )
+        ):
+            return Response(
+                {
+                    "question": question,
+                    "answer": (
+                        "Appointment cancellation requires "
+                        "an appointment ID and explicit confirmation."
+                    ),
+                    "tool": "cancel_appointment",
+                    "data": {
+                        "confirmation_required": True,
+                        "action": "cancel_appointment",
+                        "message": (
+                            "Appointment cancellation requires "
+                            "an appointment ID and explicit confirmation."
+                        ),
+                    },
+                    "confirmation_required": True,
+                },
+                status=status.HTTP_200_OK,
+            )
+
         try:
             result = ask_question(
                 question=question,

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "rest_framework_simplejwt.token_blacklist",
     "channels",
+    "corsheaders",
 
     "apps.accounts.apps.AccountsConfig",
     "apps.healthcare.apps.HealthcareConfig",
@@ -65,12 +66,26 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+
+    # CORS middleware must be before CommonMiddleware.
+    "corsheaders.middleware.CorsMiddleware",
+
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.audit.middleware.AuditMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+
+# =============================================================================
+# CORS
+# =============================================================================
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 
@@ -114,11 +129,26 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv("DB_NAME", "healthcare_copilot"),
-        "USER": os.getenv("DB_USER", "root"),
-        "PASSWORD": os.getenv("DB_PASSWORD", ""),
-        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
-        "PORT": os.getenv("DB_PORT", "3306"),
+        "NAME": os.getenv(
+            "DB_NAME",
+            "healthcare_copilot",
+        ),
+        "USER": os.getenv(
+            "DB_USER",
+            "root",
+        ),
+        "PASSWORD": os.getenv(
+            "DB_PASSWORD",
+            "",
+        ),
+        "HOST": os.getenv(
+            "DB_HOST",
+            "127.0.0.1",
+        ),
+        "PORT": os.getenv(
+            "DB_PORT",
+            "3306",
+        ),
         "OPTIONS": {
             "charset": "utf8mb4",
         },
@@ -175,7 +205,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = os.getenv("TIME_ZONE", "Asia/Kolkata")
+TIME_ZONE = os.getenv(
+    "TIME_ZONE",
+    "Asia/Kolkata",
+)
 
 USE_I18N = True
 
@@ -241,8 +274,12 @@ SPECTACULAR_SETTINGS = {
 # =============================================================================
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=30,
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=1,
+    ),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
@@ -263,7 +300,9 @@ CELERY_RESULT_BACKEND = os.getenv(
     "redis://127.0.0.1:6379/0",
 )
 
-CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_ACCEPT_CONTENT = [
+    "json",
+]
 
 CELERY_TASK_SERIALIZER = "json"
 
@@ -276,13 +315,22 @@ CELERY_TIMEZONE = TIME_ZONE
 # CHANNELS / REDIS
 # =============================================================================
 
+REDIS_HOST = os.getenv(
+    "REDIS_HOST",
+    "127.0.0.1",
+)
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "BACKEND": (
+            "channels_redis.core.RedisChannelLayer"
+        ),
         "CONFIG": {
             "hosts": [
                 {
-                    "address": "redis://127.0.0.1:6379/0",
+                    "address": (
+                        f"redis://{REDIS_HOST}:6379/0"
+                    ),
                     "socket_timeout": None,
                     "socket_connect_timeout": 5,
                 }
@@ -311,7 +359,9 @@ OLLAMA_MODEL = os.getenv(
 # VECTOR STORE
 # =============================================================================
 
-VECTOR_STORE_PATH = BASE_DIR / "vector_store"
+VECTOR_STORE_PATH = (
+    BASE_DIR / "vector_store"
+)
 
 VECTOR_STORE_PATH.mkdir(
     parents=True,
@@ -323,9 +373,13 @@ VECTOR_STORE_PATH.mkdir(
 # FILE UPLOAD SETTINGS
 # =============================================================================
 
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = (
+    10 * 1024 * 1024
+)
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = (
+    20 * 1024 * 1024
+)
 
 
 # =============================================================================
@@ -347,7 +401,12 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         "CSRF_TRUSTED_ORIGINS",
-        "http://127.0.0.1:8000,http://localhost:8000",
+        (
+            "http://127.0.0.1:8000,"
+            "http://localhost:8000,"
+            "http://127.0.0.1:5173,"
+            "http://localhost:5173"
+        ),
     ).split(",")
     if origin.strip()
 ]

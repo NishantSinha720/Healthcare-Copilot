@@ -1,8 +1,11 @@
-from drf_spectacular.utils import OpenApiResponse, extend_schema
-from rest_framework import generics, status
+﻿from drf_spectacular.utils import (
+    OpenApiResponse,
+    extend_schema,
+    inline_serializer,
+)
+from rest_framework import generics, serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Notification
 from .serializers import NotificationSerializer
@@ -16,27 +19,28 @@ class NotificationListView(generics.ListAPIView):
         responses={
             200: NotificationSerializer(many=True),
             401: OpenApiResponse(
-                description="Authentication required."
+                description="Authentication required.",
             ),
         }
     )
     def get_queryset(self):
         return Notification.objects.filter(
-            recipient=self.request.user
+            recipient=self.request.user,
         )
 
 
-class NotificationReadView(APIView):
+class NotificationReadView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = NotificationSerializer
 
     @extend_schema(
         responses={
             200: NotificationSerializer,
             401: OpenApiResponse(
-                description="Authentication required."
+                description="Authentication required.",
             ),
             404: OpenApiResponse(
-                description="Notification not found."
+                description="Notification not found.",
             ),
         }
     )
@@ -53,29 +57,29 @@ class NotificationReadView(APIView):
             )
 
         notification.is_read = True
-
-        notification.save(
-            update_fields=["is_read"]
-        )
+        notification.save(update_fields=["is_read"])
 
         return Response(
-            NotificationSerializer(
-                notification
-            ).data,
+            NotificationSerializer(notification).data,
             status=status.HTTP_200_OK,
         )
 
 
-class NotificationReadAllView(APIView):
+class NotificationReadAllView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = inline_serializer(
+        name="NotificationReadAllResponse",
+        fields={
+            "message": serializers.CharField(),
+            "updated_count": serializers.IntegerField(),
+        },
+    )
 
     @extend_schema(
         responses={
-            200: OpenApiResponse(
-                description="All unread notifications were marked as read."
-            ),
+            200: serializer_class,
             401: OpenApiResponse(
-                description="Authentication required."
+                description="Authentication required.",
             ),
         }
     )
@@ -83,9 +87,7 @@ class NotificationReadAllView(APIView):
         updated = Notification.objects.filter(
             recipient=request.user,
             is_read=False,
-        ).update(
-            is_read=True
-        )
+        ).update(is_read=True)
 
         return Response(
             {

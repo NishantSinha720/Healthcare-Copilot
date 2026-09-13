@@ -1,4 +1,4 @@
-import json
+﻿import json
 import re
 
 import requests
@@ -76,7 +76,6 @@ def _call_ollama(prompt):
 
     try:
         return json.loads(raw_response)
-
     except json.JSONDecodeError as exc:
         raise ValueError(
             f"Ollama returned invalid JSON: {raw_response}"
@@ -226,6 +225,23 @@ def _execute_tool(
     )
 
 
+def _generate_confirmation_answer(
+    tool_result,
+):
+    if not tool_result.get(
+        "confirmation_required",
+        False,
+    ):
+        return None
+
+    message = tool_result.get(
+        "message",
+        "Explicit confirmation is required before this action can be completed.",
+    )
+
+    return message
+
+
 def _generate_final_answer(
     question,
     tool_name,
@@ -291,65 +307,66 @@ def run_agent(
     user,
 ):
     if not question or not question.strip():
-        raise ValueError("Question cannot be empty.")
+        raise ValueError(
+            "Question cannot be empty."
+        )
 
     question = question.strip()
 
-    # Sensitive actions are handled deterministically.
-    # Never ask Ollama to decide or execute a cancellation.
-    if _is_cancel_request(question):
-        appointment_id = _extract_appointment_id(question)
-
-        if appointment_id is None:
-            try:
-                appointments = get_my_appointments(user)
-            except Exception:
-                appointments = []
-
-            tool_result = {
-                "confirmation_required": True,
-                "action": "cancel_appointment",
-                "message": (
-                    "Appointment cancellation requires "
-                    "an appointment ID and explicit confirmation."
-                ),
-                "appointments": appointments,
-            }
-
-            return {
-                "question": question,
-                "answer": tool_result["message"],
-                "tool": "cancel_appointment",
-                "data": tool_result,
-                "confirmation_required": True,
-            }
-
-        tool_result = request_cancel_appointment(
-            user=user,
-            appointment_id=appointment_id,
-        )
-
-        return {
-            "question": question,
-            "answer": tool_result.get(
-                "message",
-                "Explicit confirmation is required before the appointment can be cancelled.",
-            ),
-            "tool": "cancel_appointment",
-            "data": tool_result,
-            "confirmation_required": tool_result.get(
-                "confirmation_required",
-                True,
-            ),
-        }
-
-    tool_name = _choose_tool(question)
+    tool_name = _choose_tool(
+        question
+    )
 
     tool_result = _execute_tool(
         tool_name=tool_name,
         user=user,
         question=question,
     )
+
+    # Sensitive actions must never require an LLM to
+    # produce the confirmation response. This keeps
+    # the safety boundary deterministic and ensures
+    # cancellation requests work even when Ollama is
+    # unavailable.
+    if (
+        tool_name == "cancel_appointment"
+        and tool_result.get(
+            "confirmation_required",
+            False,
+        )
+    ):
+        answer = _generate_confirmation_answer(
+            tool_result
+        )
+
+        return {
+            "question": question,
+            "answer": answer,
+            "tool": tool_name,
+            "data": tool_result,
+            "confirmation_required": True,
+        }
+
+    # If an appointment is already cancelled, return
+    # the deterministic tool message instead of asking
+    # the LLM to rewrite it.
+    if (
+        tool_name == "cancel_appointment"
+        and not tool_result.get(
+            "confirmation_required",
+            False,
+        )
+    ):
+        return {
+            "question": question,
+            "answer": tool_result.get(
+                "message",
+                "The appointment cancellation request was processed.",
+            ),
+            "tool": tool_name,
+            "data": tool_result,
+            "confirmation_required": False,
+        }
 
     answer = _generate_final_answer(
         question=question,
