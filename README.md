@@ -1,49 +1,41 @@
-# Healthcare Copilot
+# 🏥 Healthcare Copilot
 
-**Healthcare Copilot** is a full-stack healthcare management platform built by **Nishant Sinha**, combining production-oriented software engineering with practical AI integration.
+**Healthcare Copilot** is a full-stack healthcare management platform built by **Nishant Sinha**, combining production-oriented backend engineering with practical AI integration.
 
-The platform provides secure healthcare management APIs, authentication and authorization, appointment management, medical records, prescriptions, document processing, background jobs, real-time notifications, audit logging, and AI-powered document search and assistance.
+The platform provides secure healthcare APIs, authentication and authorization, appointment management, medical records, prescriptions, document processing, background jobs, real-time notifications, audit logging, and AI-powered document search and assistance.
 
-The primary focus of the project is **software engineering and backend architecture**, with AI integrated as a practical product capability.
-
----
-
-## 👨‍💻 Author
-
-**Nishant Sinha**
-
-GitHub: [NishantSinha720](https://github.com/NishantSinha720)
+The primary focus is **software engineering and backend architecture**, with AI integrated as a practical product capability.
 
 ---
 
-# 🎯 Project Focus
+## 🎯 Project Focus
 
-Healthcare Copilot is designed to demonstrate how a modern software product can integrate AI without making the entire application dependent on AI.
+Healthcare Copilot demonstrates how a modern software product can integrate AI without making the entire application dependent on AI.
 
-### Primary focus
+### Core Engineering
 
 * Backend engineering
 * REST API development
-* Authentication and authorization
+* Authentication & authorization
 * Database design
 * Business logic
 * Asynchronous processing
 * Real-time communication
 * Security
-* Testing
+* Automated testing
 * Containerization
 * CI/CD
 
-### AI integration
+### AI Integration
 
-* Retrieval-Augmented Generation
+* Retrieval-Augmented Generation (RAG)
 * Semantic search
 * Embeddings
-* FAISS
+* FAISS vector search
 * Local LLM inference
 * AI agents
 * Tool calling
-* Human confirmation for sensitive actions
+* Human-in-the-loop confirmation
 
 ---
 
@@ -58,23 +50,22 @@ Healthcare Copilot is designed to demonstrate how a modern software product can 
                                 ▼
                     Django REST Framework
                                 │
-        ┌───────────────────────┼────────────────────────┐
-        │                       │                        │
-        ▼                       ▼                        ▼
-      MySQL                   Redis                  AI Layer
-        │                       │                        │
-        │                 ┌─────┴─────┐           ┌──────┴──────┐
-        │                 ▼           ▼           ▼             ▼
-        │              Celery     Channels      RAG          AI Agent
-        │                 │           │           │             │
-        │                 ▼           ▼           ▼             ▼
-        │          Background     WebSocket     FAISS         Tools
-        │          Processing                    │             │
-        │                                       ▼             ▼
-        │                                     Ollama      Permission
-        │                                                   Checks
-        │
-        └────────────────────────────────────────────────────────
+          ┌─────────────────────┼─────────────────────┐
+          │                     │                     │
+          ▼                     ▼                     ▼
+        MySQL                 Redis                AI Layer
+          │                     │                     │
+          │              ┌──────┴──────┐       ┌──────┴──────┐
+          │              ▼             ▼       ▼             ▼
+          │           Celery       Channels   RAG         AI Agent
+          │              │             │       │             │
+          │              ▼             ▼       ▼             ▼
+          │        Background      WebSocket  FAISS        Tools
+          │        Processing                    │             │
+          │                                     ▼             ▼
+          │                                   Ollama      Permission
+          │                                                 Checks
+          └────────────────────────────────────────────────────────
 ```
 
 ---
@@ -83,19 +74,21 @@ Healthcare Copilot is designed to demonstrate how a modern software product can 
 
 ## 🔐 Authentication & Authorization
 
+The platform implements secure authentication and access control using:
+
 * JWT authentication
 * Access and refresh tokens
 * Refresh-token rotation
 * Refresh-token blacklisting
 * Custom Django User model
-* Role-Based Access Control
+* Role-Based Access Control (RBAC)
 * Protected REST APIs
 * Object-level authorization
 * Organization-level access control
 * Password hashing
-* Secure production configuration
+* Production security configuration
 
-Supported roles:
+### Supported Roles
 
 ```text
 ADMIN
@@ -111,13 +104,16 @@ Public registration cannot escalate a user to an administrative role.
 
 ## Organizations
 
-Healthcare organizations represent hospitals and clinics.
+Organizations represent healthcare facilities such as hospitals and clinics.
 
-Each organization can contain doctors and patients.
+Each organization can contain:
+
+* Doctors
+* Patients
 
 ---
 
-## Doctors
+## 👨‍⚕️ Doctors
 
 Doctor profiles support:
 
@@ -127,7 +123,7 @@ Doctor profiles support:
 
 ---
 
-## Patients
+## 🧑‍🤝‍🧑 Patients
 
 Patient profiles support:
 
@@ -137,7 +133,7 @@ Patient profiles support:
 
 ---
 
-## Appointments
+## 📅 Appointments
 
 The appointment system supports:
 
@@ -145,13 +141,13 @@ The appointment system supports:
 * Appointment retrieval
 * Appointment updates
 * Appointment cancellation
-* Status management
+* Appointment status management
 * Double-booking prevention
 * Role-based access
 
 ---
 
-## Medical Records
+## 📋 Medical Records
 
 Medical records contain:
 
@@ -168,7 +164,7 @@ Patients cannot directly create medical records.
 
 ---
 
-## Prescriptions
+## 💊 Prescriptions
 
 Prescriptions contain:
 
@@ -188,7 +184,7 @@ Prescriptions contain:
 
 The core application is built using **Django REST Framework**.
 
-Healthcare Copilot exposes RESTful APIs for:
+The platform exposes APIs for:
 
 * Authentication
 * Users
@@ -204,7 +200,7 @@ Healthcare Copilot exposes RESTful APIs for:
 * Notifications
 * Auditing
 
-Examples:
+### Example Endpoints
 
 ```text
 POST /api/auth/register/
@@ -229,7 +225,7 @@ GET /api/audit/
 
 # 🤖 AI Integration
 
-AI is integrated into the platform as a supporting software capability rather than replacing the core business logic.
+AI is integrated as a **supporting software capability** rather than replacing the core application business logic.
 
 The AI layer provides:
 
@@ -244,36 +240,36 @@ The AI layer provides:
 
 # 📄 Document Processing
 
-The platform supports:
+The platform supports document processing for:
 
 * PDF
 * DOCX
 
-Document processing pipeline:
+### Processing Pipeline
 
 ```text
-Upload
-  ↓
+Document Upload
+      ↓
 Validation
-  ↓
+      ↓
 Database Metadata
-  ↓
+      ↓
 Celery
-  ↓
+      ↓
 Text Extraction
-  ↓
+      ↓
 Text Cleaning
-  ↓
+      ↓
 Chunking
-  ↓
+      ↓
 Embeddings
-  ↓
+      ↓
 FAISS
-  ↓
+      ↓
 READY
 ```
 
-Libraries:
+### Document Processing Libraries
 
 * PyMuPDF
 * python-docx
@@ -282,19 +278,19 @@ Libraries:
 
 ---
 
-# 🔎 RAG
+# 🔎 Retrieval-Augmented Generation (RAG)
 
 The RAG system uses:
 
 ```text
 all-MiniLM-L6-v2
         ↓
-384-dimensional embeddings
+384-dimensional Embeddings
         ↓
 FAISS IndexFlatIP
 ```
 
-Query flow:
+### RAG Query Flow
 
 ```text
 User Question
@@ -303,15 +299,15 @@ Authentication
       ↓
 Authorization
       ↓
-Embedding
+Generate Embedding
       ↓
-FAISS Search
+FAISS Similarity Search
       ↓
-Relevant Chunks
+Retrieve Relevant Chunks
       ↓
-Context
+Build Context
       ↓
-Ollama
+Ollama / LLM
       ↓
 Grounded Answer
 ```
@@ -320,26 +316,26 @@ Document retrieval is restricted according to the authenticated user's access sc
 
 ---
 
-# 🧠 Local LLM
+# 🧠 Local LLM with Ollama
 
-The project uses **Ollama** for local AI inference.
+The project uses **Ollama** for local LLM inference.
 
-Example:
+Example configuration:
 
 ```env
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_MODEL=llama2:7b
 ```
 
-This allows the AI functionality to run locally without requiring a paid external AI provider.
+Running the model locally allows the AI functionality to operate without requiring a paid external AI provider.
 
 ---
 
 # 🧑‍💻 AI Agent
 
-The AI agent can select application tools based on user requests.
+The AI agent can select application tools based on the user's request.
 
-Available tools include:
+### Available Tools
 
 ```text
 search_medical_documents
@@ -350,9 +346,9 @@ request_cancel_appointment
 confirm_cancel_appointment
 ```
 
-The agent does **not** directly access MySQL.
+The AI agent does **not directly access MySQL**.
 
-Instead:
+Instead, application tools control access:
 
 ```text
 AI Agent
@@ -376,7 +372,7 @@ This keeps business logic and authorization under application control.
 
 Sensitive actions require explicit user confirmation.
 
-For example:
+### Example: Appointment Cancellation
 
 ```text
 User
@@ -385,15 +381,15 @@ User
  ↓
 AI Agent
  ↓
-Find appointment
+Find Appointment
  ↓
-Request confirmation
+Request Confirmation
  ↓
-User confirms
+User Confirms
  ↓
-Confirmation endpoint
+Confirmation Endpoint
  ↓
-Permission check
+Permission Check
  ↓
 Cancellation
 ```
@@ -404,7 +400,7 @@ This prevents the AI agent from silently performing sensitive operations.
 
 # ⚡ Background Processing
 
-Celery handles asynchronous operations.
+**Celery** is used for asynchronous/background processing.
 
 Current background workflows include:
 
@@ -413,7 +409,7 @@ process_document_task
 create_notification_task
 ```
 
-Redis is used as the Celery broker/result backend.
+**Redis** is used as the Celery broker/result backend.
 
 ---
 
@@ -425,13 +421,13 @@ The application uses:
 * WebSockets
 * Redis
 
-WebSocket endpoint:
+### WebSocket Endpoint
 
 ```text
 /ws/notifications/?token=<JWT_ACCESS_TOKEN>
 ```
 
-Notification flow:
+### Notification Flow
 
 ```text
 Application Event
@@ -453,7 +449,7 @@ Frontend
 
 Important application activity is recorded through an audit system.
 
-Supported actions include:
+### Supported Actions
 
 ```text
 LOGIN
@@ -484,21 +480,21 @@ Audit records can include:
 
 # 📚 API Documentation
 
-OpenAPI schema is generated using **drf-spectacular**.
+The project uses **drf-spectacular** to generate OpenAPI documentation.
 
-Swagger UI:
+### Swagger UI
 
 ```text
 http://127.0.0.1:8000/api/docs/
 ```
 
-OpenAPI:
+### OpenAPI Schema
 
 ```text
 http://127.0.0.1:8000/api/schema/
 ```
 
-Docker/Nginx:
+### Docker/Nginx
 
 ```text
 http://127.0.0.1:8080/api/docs/
@@ -513,7 +509,9 @@ The project uses:
 * pytest
 * pytest-django
 
-Test coverage includes:
+### Test Coverage
+
+Tests cover:
 
 * Authentication
 * JWT protection
@@ -528,13 +526,13 @@ Test coverage includes:
 * AI agent confirmation
 * Registration role escalation
 
-Run:
+### Run Tests
 
 ```bash
 pytest -q
 ```
 
-Additional checks:
+### Django Checks
 
 ```bash
 python manage.py check
@@ -544,6 +542,8 @@ python manage.py check
 python manage.py check --deploy
 ```
 
+### Migration Check
+
 ```bash
 python manage.py makemigrations --check --dry-run
 ```
@@ -552,9 +552,9 @@ python manage.py makemigrations --check --dry-run
 
 # 🐳 Docker
 
-The project is containerized using Docker Compose.
+The application is containerized using **Docker Compose**.
 
-Services:
+### Services
 
 ```text
 MySQL
@@ -564,25 +564,25 @@ Celery
 Nginx
 ```
 
-Start:
+### Start Application
 
 ```bash
 docker compose up -d --build
 ```
 
-Check:
+### Check Containers
 
 ```bash
 docker compose ps
 ```
 
-Logs:
+### View Logs
 
 ```bash
 docker compose logs -f web
 ```
 
-Docker ports:
+### Docker Ports
 
 ```text
 MySQL  → localhost:3307
@@ -591,7 +591,7 @@ Nginx  → localhost:8080
 Django → internal port 8000
 ```
 
-Swagger through Nginx:
+### Swagger Through Nginx
 
 ```text
 http://127.0.0.1:8080/api/docs/
@@ -601,9 +601,9 @@ http://127.0.0.1:8080/api/docs/
 
 # 🔄 CI/CD
 
-GitHub Actions validates the project automatically.
+GitHub Actions is used to automatically validate the project.
 
-Pipeline:
+### Pipeline
 
 ```text
 Checkout
@@ -625,7 +625,7 @@ Migrations
 pytest
 ```
 
-Workflow:
+### Workflow
 
 ```text
 .github/workflows/ci.yml
@@ -635,7 +635,7 @@ Workflow:
 
 # 🛡️ Security Architecture
 
-Security is implemented at multiple layers.
+Security is implemented across multiple layers.
 
 ```text
 Request
@@ -655,7 +655,7 @@ Database
 
 The AI agent follows the same security boundaries.
 
-The LLM cannot bypass application authorization.
+**The LLM cannot bypass application authorization.**
 
 ---
 
@@ -711,120 +711,85 @@ Healthcare-Copilot/
 
 # 🧰 Technology Stack
 
-## Backend
-
-* Python
-* Django
-* Django REST Framework
-* SimpleJWT
-
-## Database
-
-* MySQL
-
-## Async & Real-Time
-
-* Redis
-* Celery
-* Django Channels
-* WebSockets
-* Daphne
-
-## AI / ML
-
-* Ollama
-* Llama-family LLM
-* Sentence Transformers
-* FAISS
-* RAG
-* AI Agents
-* Tool Calling
-
-## Document Processing
-
-* PyMuPDF
-* python-docx
-
-## Testing
-
-* pytest
-* pytest-django
-
-## API Documentation
-
-* OpenAPI
-* Swagger UI
-* drf-spectacular
-
-## Frontend
-
-* React
-* TypeScript
-* Vite
-
-## DevOps
-
-* Docker
-* Docker Compose
-* Nginx
-* GitHub Actions
+| Category          | Technologies                                           |
+| ----------------- | ------------------------------------------------------ |
+| Backend           | Python, Django, Django REST Framework                  |
+| Authentication    | SimpleJWT                                              |
+| Database          | MySQL                                                  |
+| Async Processing  | Redis, Celery                                          |
+| Real-Time         | Django Channels, WebSockets, Daphne                    |
+| AI/ML             | Ollama, Llama-family LLM, Sentence Transformers, FAISS |
+| AI Architecture   | RAG, AI Agents, Tool Calling                           |
+| Documents         | PyMuPDF, python-docx                                   |
+| Testing           | pytest, pytest-django                                  |
+| API Documentation | OpenAPI, Swagger UI, drf-spectacular                   |
+| Frontend          | React, TypeScript, Vite                                |
+| DevOps            | Docker, Docker Compose, Nginx                          |
+| CI/CD             | GitHub Actions                                         |
 
 ---
 
 # ⚙️ Local Development
 
-Clone:
+## 1. Clone Repository
 
 ```bash
 git clone https://github.com/NishantSinha720/Healthcare-Copilot.git
+
 cd Healthcare-Copilot
 ```
 
-Create environment:
+## 2. Create Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-Windows:
+### Windows
 
-```powershell
+```bash
 venv\Scripts\activate
 ```
 
-Install dependencies:
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements/base.txt
 ```
 
-Configure `.env` using `.env.example`.
+## 4. Configure Environment
 
-Run migrations:
+Create your `.env` file using:
+
+```text
+.env.example
+```
+
+## 5. Run Migrations
 
 ```bash
 python manage.py migrate
 ```
 
-Create administrator:
+## 6. Create Administrator
 
 ```bash
 python manage.py createsuperuser
 ```
 
-Start Django:
+## 7. Start Django
 
 ```bash
 python manage.py runserver
 ```
 
-Start Celery:
+## 8. Start Celery
 
 ```bash
 celery -A config.celery worker --loglevel=info --pool=solo
 ```
 
-Start Redis separately or through Docker.
+Redis should be running separately or through Docker.
 
 ---
 
@@ -842,7 +807,7 @@ Start Ollama:
 ollama serve
 ```
 
-Verify:
+Verify the installed model:
 
 ```bash
 ollama list
@@ -852,7 +817,7 @@ ollama list
 
 # 🎓 Engineering Concepts Demonstrated
 
-Healthcare Copilot demonstrates practical experience with:
+This project demonstrates practical experience with:
 
 * Software architecture
 * RESTful API design
@@ -888,11 +853,11 @@ Healthcare Copilot demonstrates practical experience with:
 
 ---
 
-# 🚧 Project Status
+# 📌 Project Status
 
-Healthcare Copilot is being developed as an end-to-end portfolio application.
+Healthcare Copilot is being developed as an **end-to-end portfolio application**.
 
-### Completed
+### ✅ Completed
 
 * Core Django architecture
 * REST API
@@ -920,7 +885,7 @@ Healthcare Copilot is being developed as an end-to-end portfolio application.
 * Nginx
 * CI/CD configuration
 
-### Final Development
+### 🚧 Final Development
 
 * React + TypeScript frontend
 * Full frontend/backend integration
@@ -933,7 +898,7 @@ Healthcare Copilot is being developed as an end-to-end portfolio application.
 
 # ⚠️ Disclaimer
 
-Healthcare Copilot is an educational and portfolio project.
+Healthcare Copilot is an **educational and portfolio project**.
 
 It is **not a medical device** and does not replace professional medical advice, diagnosis, or treatment.
 
@@ -943,12 +908,12 @@ AI-generated information should be reviewed by an appropriately qualified health
 
 # 📄 License
 
-This project is currently intended for educational and portfolio purposes.
+This project is currently intended for **educational and portfolio purposes**.
 
 An appropriate open-source license can be added before public redistribution.
 
 ---
 
-## Built by Nishant Sinha
+# 👨‍💻 Built by Nishant Sinha
 
-Healthcare Copilot is a software-engineering-focused application demonstrating how modern backend systems can integrate AI, asynchronous processing, real-time communication, security, testing, and containerized deployment into a single product.
+Healthcare Copilot is a software-engineering-focused application demonstrating how modern backend systems can integrate **AI, asynchronous processing, real-time communication, security, testing, and containerized deployment** into a single product.
